@@ -8,22 +8,62 @@
 
 import UIKit
 
-let locations = [
-    ["location": "Gothenburg", "temp": "2 °C", "wind": "3 m/s"],
-    ["location": "London", "temp": "15 °C", "wind": "9 m/s"],
-    ["location": "Lindome", "temp": "-5 °C", "wind": "4 m/s"]
+var locations = [
+    ["location": "Gothenburg", "temp": "2 °C", "wind": "3 m/s"]
 ]
 
 var locationId = 0
 
-class WeatherTableViewController: UITableViewController {
+struct APILocation: Decodable {
+    let name: String
+    let main: Main
+}
 
+struct Main: Decodable {
+    let temp: Int
+    let pressure: Int
+    let humidity: Int
+}
+
+class WeatherTableViewController: UITableViewController, UISearchBarDelegate {
+    
+    @IBOutlet var locationsTableView: UITableView!
     @IBOutlet weak var search: UISearchBar!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         print(locations.count)
         self.title = "Locations"
+        
+        search.delegate = self
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
+        
+        if let location = searchBar.text, !location.isEmpty {
+            updateWeather(location: location)
+        }
+    }
+    
+    func updateWeather (location: String) {
+        guard let weatherApi = URL(string: "https://api.openweathermap.org/data/2.5/weather?q=\(location)&units=metric&APPID=d659190d89ad48a42b479200eacaf33d") else { return }
+        
+        URLSession.shared.dataTask(with: weatherApi) { (data, res, err) in
+            
+            guard let data = data else { return }
+            
+            guard let res = try? JSONDecoder().decode(APILocation.self, from: data) else {
+                print("Error: Couldn't decode data")
+                return
+            }
+            print(res)
+            locations.append(["location": res.name, "temp": "\(res.main.temp) °C", "wind": "\(res.main.humidity)"])
+            DispatchQueue.main.async{
+                self.locationsTableView.reloadData()
+            }
+        }.resume()
+        print(location)
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
