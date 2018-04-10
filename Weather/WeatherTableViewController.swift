@@ -8,21 +8,26 @@
 
 import UIKit
 
-var locations = [
-    ["location": "Gothenburg", "temp": "2 °C", "wind": "3 m/s"]
-]
+var locations: [[String: String]] = []
 
 var locationId = 0
 
-struct APILocation: Decodable {
+struct APIData: Codable {
     let name: String
+    let weather: [Weather]
     let main: Main
+    let wind: [String : Double]
 }
 
-struct Main: Decodable {
+struct Main: Codable {
     let temp: Int
     let pressure: Int
     let humidity: Int
+}
+
+struct Weather: Codable {
+    let main: String
+    let description: String
 }
 
 class WeatherTableViewController: UITableViewController, UISearchBarDelegate {
@@ -53,12 +58,12 @@ class WeatherTableViewController: UITableViewController, UISearchBarDelegate {
             
             guard let data = data else { return }
             
-            guard let res = try? JSONDecoder().decode(APILocation.self, from: data) else {
+            guard let res = try? JSONDecoder().decode(APIData.self, from: data) else {
                 print("Error: Couldn't decode data")
                 return
             }
             print(res)
-            locations.append(["location": res.name, "temp": "\(res.main.temp) °C", "wind": "\(res.main.humidity)"])
+            locations.append(["location": res.name, "temp": "\(res.main.temp)", "humidity": "\(res.main.humidity)", "wind": "\(res.wind["speed"] ?? 0) m/s"])
             DispatchQueue.main.async{
                 self.locationsTableView.reloadData()
             }
@@ -69,7 +74,6 @@ class WeatherTableViewController: UITableViewController, UISearchBarDelegate {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return locations.count
     }
-
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
@@ -80,7 +84,6 @@ class WeatherTableViewController: UITableViewController, UISearchBarDelegate {
 
         return cell
     }
-    
     
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 80
