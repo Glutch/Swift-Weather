@@ -16,13 +16,18 @@ struct APIData: Codable {
     let name: String
     let weather: [Weather]
     let main: Main
-    let wind: [String : Double]
+    let wind: Wind
+}
+
+struct Wind: Codable {
+    let speed: Double
+    let deg: Double
 }
 
 struct Main: Codable {
-    let temp: Int
-    let pressure: Int
-    let humidity: Int
+    let temp: Double
+    let pressure: Double
+    let humidity: Double
 }
 
 struct Weather: Codable {
@@ -63,7 +68,7 @@ class WeatherTableViewController: UITableViewController, UISearchBarDelegate {
                 return
             }
             print(res)
-            locations.append(["location": res.name, "temp": "\(res.main.temp)", "humidity": "\(res.main.humidity)", "wind": "\(res.wind["speed"] ?? 0) m/s"])
+            locations.append(["location": res.name, "temp": "\(res.main.temp)", "humidity": "\(res.main.humidity)", "wind": "\(res.wind.speed ?? 0) m/s"])
             DispatchQueue.main.async{
                 self.locationsTableView.reloadData()
             }
