@@ -23,25 +23,30 @@ class LocationsController: UIViewController {
         super.viewDidLoad()
         
         let temp = locations[locationId]["temp"]
+        
         self.title = locations[locationId]["location"]
         locationName.text = locations[locationId]["location"]
         temperatureLabel.text = "\(locations[locationId]["temp"] ?? "0") °C"
         windLabel.text = locations[locationId]["wind"]
         
-        if (Int(temp!)! < -15) {
-            armorLabel.text = "Don't go outside."
-        } else if (Int(temp!)! < 5) {
-            armorLabel.text = "Bring your warmest jacket."
-        } else if (Int(temp!)! < 10) {
-            armorLabel.text = "Bring a warm jacket."
-        } else if (Int(temp!)! < 20) {
-            armorLabel.text = "Bring a light summer jacket."
-        } else if (Int(temp!)! < 25) {
-            armorLabel.text = "A t-shirt should be enough."
-        } else if (Int(temp!)! < 30) {
-            armorLabel.text = "Go naked or stay inside."
+        if let temperature = temp {
+            if let tempAsFloat = Float(temperature) {
+                if (tempAsFloat < -15) {
+                    armorLabel.text = "Don't go outside."
+                } else if (tempAsFloat < 5) {
+                    armorLabel.text = "Bring your warmest jacket."
+                } else if (tempAsFloat < 10) {
+                    armorLabel.text = "Bring a warm jacket."
+                } else if (tempAsFloat < 20) {
+                    armorLabel.text = "Bring a light summer jacket."
+                } else if (tempAsFloat < 25) {
+                    armorLabel.text = "A t-shirt should be enough."
+                } else if (tempAsFloat < 30) {
+                    armorLabel.text = "Go naked or stay inside."
+                }
+            }
         }
-        
+                
         createBoxesForNoReason()
     }
     
